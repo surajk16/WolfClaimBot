@@ -126,7 +126,6 @@ async function handleClaim(message, claim, res) {
     res.end('Error :' + err)
   }
 
-  console.log('Claim sent')
   res.send('ok')
 }
 
@@ -165,7 +164,6 @@ async function sendClaimList (message, res) {
     res.end('Error :' + err)
   }
 
-  console.log('Claim sent')
   res.send('ok')
 }
 
@@ -187,7 +185,6 @@ async function handleReset(message, res) {
         reply_to_message_id: message.message_id,
         text: "Reset claims list"
       })
-      console.log("Sent reset")
   } catch(err) {
     console.log('Error :', err)
     res.end('Error :' + err)
@@ -216,6 +213,23 @@ app.post('/new-message', async function (req, res) {
     }
   } else if (message.text.includes("/reset")) {
     handleReset(message, res)
+  } else if (message.text.includes("/ping")) {
+    var in_time = new Date(message.date * 1000)
+    var out_time = new Date();
+    var diff =  (out_time.getTime()-in_time.getTime())/1000
+
+    try {
+      await axios.post(TELEGRAM_API_BASE + process.env.BOT_TOKEN + SEND_MESSAGE,
+        {
+          chat_id: message.chat.id,
+          reply_to_message_id: message.message_id,
+          text: "Pong! (delayed by " + diff + " seconds)"
+        })
+    } catch(err) {
+      console.log('Error :', err)
+      res.end('Error :' + err)
+    }
+    res.send('ok')
   } else {
     res.end()
   }
