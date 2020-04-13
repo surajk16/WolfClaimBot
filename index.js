@@ -139,6 +139,8 @@ async function sendClaimList (message, res) {
   }
 
   var claim_message = prepareClaimMessage(gameCharList[game_id].claims)
+  if (claim_message == "")
+    claim_message = "No claims yet!"
 
   try {
     await axios.post(TELEGRAM_API_BASE + process.env.BOT_TOKEN + DELETE_MESSAGE,
@@ -193,11 +195,44 @@ async function handleReset(message, res) {
   res.send('ok')
 }
 
+async function flip(message, res) {
+  var chat = message.chat
+  var random_num = Math.random()
+  var result
+  if (random_num >= 0.5) {
+    result = "Heads"
+  } else {
+    result = "Tails"
+  }
+
+  try {
+    await axios.post(TELEGRAM_API_BASE + process.env.BOT_TOKEN + SEND_MESSAGE,
+      {
+        chat_id: chat.id,
+        reply_to_message_id: message.message_id,
+        text: result
+      })
+  } catch(err) {
+    console.log('Error :', err)
+    res.end('Error :' + err)
+  }
+
+  res.send('ok')
+}
+
 //This is the route the API will call
 app.post('/new-message', async function (req, res) {
 
   const { message } = req.body
   console.log(message)
+
+  var in_time = new Date(message.date * 1000)
+  var out_time = new Date();
+  var diff =  (out_time.getTime()-in_time.getTime()) / 1000
+
+  if (diff > 60 * 2) {
+    return res.end()
+  }
 
   if (!message || !message.text) {
     return res.end()
@@ -211,7 +246,7 @@ app.post('/new-message', async function (req, res) {
     } else {
       handleClaim(message, claim, res)
     }
-  } else if (message.text.includes("/reset")) {
+  } else if (message.text.includes("/reset") || message.text.includes("Game is starting")) {
     handleReset(message, res)
   } else if (message.text.includes("/ping")) {
     var in_time = new Date(message.date * 1000)
@@ -230,6 +265,8 @@ app.post('/new-message', async function (req, res) {
       res.end('Error :' + err)
     }
     res.send('ok')
+  } else if (message.text.includes("/flip")) {
+    flip(message, res)
   } else {
     res.end()
   }
