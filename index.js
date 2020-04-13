@@ -265,7 +265,7 @@ app.post('/new-message', async function (req, res) {
     } else {
       handleClaim(message, claim, res)
     }
-  } else if (message.text.includes("/reset") || message.text.includes("Game is starting")) {
+  } else if (message.text.includes("/reset") || message.text.includes("/forcestart")) {
     handleReset(message, res)
   } else if (message.text.includes("/ping")) {
     var in_time = new Date(message.date * 1000)
