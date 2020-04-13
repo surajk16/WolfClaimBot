@@ -220,6 +220,25 @@ async function flip(message, res) {
   res.send('ok')
 }
 
+async function roll(message, res) {
+  var chat = message.chat
+  var random_num = Math.floor((Math.random() * 6) + 1);
+  
+  try {
+    await axios.post(TELEGRAM_API_BASE + process.env.BOT_TOKEN + SEND_MESSAGE,
+      {
+        chat_id: chat.id,
+        reply_to_message_id: message.message_id,
+        text: random_num
+      })
+  } catch(err) {
+    console.log('Error :', err)
+    res.end('Error :' + err)
+  }
+
+  res.send('ok')
+}
+
 //This is the route the API will call
 app.post('/new-message', async function (req, res) {
 
@@ -267,7 +286,9 @@ app.post('/new-message', async function (req, res) {
     res.send('ok')
   } else if (message.text.includes("/flip")) {
     flip(message, res)
-  } else {
+  } else if (message.text.includes("/roll")) {
+    roll(message, res)
+  }else {
     res.end()
   }
 })
