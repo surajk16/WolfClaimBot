@@ -195,6 +195,28 @@ async function handleReset(message, res) {
   res.send('ok')
 }
 
+async function sendSrinathBad(message, res) {
+  var chat = message.chat
+  var game_id = gameExists(chat.id)
+
+  var badChars = [ "wolf", "alpha", "lycan", "wolf cub", "trix", "arso", "sk", "puppet", "cult", "prowler", "sorc", "mystic"]
+  const char = badChars[Math.floor(Math.random() * badChars.length)]
+
+  try {
+    await axios.post(TELEGRAM_API_BASE + process.env.BOT_TOKEN + SEND_MESSAGE,
+      {
+        chat_id: chat.id,
+        text: "Srinath " + char
+      })
+  } catch(err) {
+    console.log('Error :', err)
+    res.end('Error :' + err)
+  }
+
+  res.send('ok')
+
+}
+
 async function flip(message, res) {
   var chat = message.chat
   var random_num = Math.random()
@@ -245,14 +267,6 @@ app.post('/new-message', async function (req, res) {
   const { message } = req.body
   console.log(message)
 
-  var in_time = new Date(message.date * 1000)
-  var out_time = new Date();
-  var diff =  (out_time.getTime()-in_time.getTime()) / 1000
-
-  if (diff > 60 * 2) {
-    return res.end()
-  }
-
   if (!message || !message.text) {
     return res.end()
   }
@@ -267,6 +281,9 @@ app.post('/new-message', async function (req, res) {
     }
   } else if (message.text.includes("/reset") || message.text.includes("/forcestart")) {
     handleReset(message, res)
+    setTimeout(function() {
+      sendSrinathBad(message, res)
+    }, 2000)
   } else if (message.text.includes("/ping")) {
     var in_time = new Date(message.date * 1000)
     var out_time = new Date();
